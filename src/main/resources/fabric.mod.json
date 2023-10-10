@@ -39,9 +39,9 @@
     "biome-fog.mixins.json"
   ],
   "depends": {
-    "minecraft": ">=1.19.3",
-    "fabricloader": ">=0.14.0",
-    "fabric": ">=0.48.0"
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
   },
   "conflicts": {
     "clear-skies": "*"
