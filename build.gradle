@@ -96,33 +96,5 @@ publishing {
 }
 
 loom {
-    runs {
-        clientOptimised {
-            name "Client Optimised"
-
-            dependencies {
-                modRuntimeOnly "maven.modrinth:modmenu:lEkperf6"
-                modRuntimeOnly "maven.modrinth:lazydfu:4SHylIO9"
-            }
-
-            client()
-        }
-
-        clientOptimisedSodium {
-            name "Client Optimized Sodium"
-
-            dependencies {
-                modRuntimeOnly "maven.modrinth:modmenu:lEkperf6"
-                modRuntimeOnly "maven.modrinth:lazydfu:4SHylIO9"
-                modRuntimeOnly "maven.modrinth:sodium:4OZL6q9h"
-                modRuntimeOnly "maven.modrinth:reeses-sodium-options:hCsMUZLa"
-                modRuntimeOnly "maven.modrinth:lithium:ZSNsJrPI"
-                modRuntimeOnly "maven.modrinth:ferrite-core:FCnCG6PS"
-            }
-
-            client()
-        }
-    }
-
     accessWidenerPath = file("src/main/resources/biome-fog.accesswidener")
 }
