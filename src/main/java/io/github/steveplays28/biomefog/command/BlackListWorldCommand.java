@@ -1,6 +1,7 @@
 package io.github.steveplays28.biomefog.command;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import io.github.steveplays28.biomefog.client.BiomeFogClient;
 import io.github.steveplays28.biomefog.config.BiomeFogConfigLoader;
@@ -9,6 +10,7 @@ import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.text.Text;
 
 import static io.github.steveplays28.biomefog.config.BiomeFogConfigLoader.BiomeFogConfigurations.BLACKLISTED_WORLDS;
+import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.argument;
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 public class BlackListWorldCommand {
@@ -17,11 +19,11 @@ public class BlackListWorldCommand {
 	public static void register(CommandDispatcher<FabricClientCommandSource> dispatcher) {
 		var command = literal(BiomeFogClient.MOD_COMMAND_ID).then(literal(NAME)
 				.then(literal("add").executes(BlackListWorldCommand::add))
-				.then(literal("remove").executes(BlackListWorldCommand::remove)));
+				.then(literal("remove").executes(BlackListWorldCommand::remove))
+				.then(literal("prueba").then(argument("color", StringArgumentType.greedyString()).executes(BlackListWorldCommand::test))));
 
 		dispatcher.register(command);
 	}
-
 	private static int add(CommandContext<FabricClientCommandSource> context) {
 		var name = WorldUtil.getWorldOrServerName();
 
@@ -46,6 +48,14 @@ public class BlackListWorldCommand {
 		}
 
 		context.getSource().sendFeedback(Text.literal("Removed the current world from the blacklisted worlds!"));
+		return 1;
+	}
+
+	private static int test(CommandContext<FabricClientCommandSource> context){
+		var color = StringArgumentType.getString(context, "color");
+		BiomeFogClient.getInstance().setShaderColor(color);
+		float[] colors = BiomeFogClient.getInstance().parseColor(color);
+		context.getSource().sendFeedback(Text.literal("red:"+colors[0]+" green: "+colors[1]+" blue: "+colors[2]));
 		return 1;
 	}
 }
