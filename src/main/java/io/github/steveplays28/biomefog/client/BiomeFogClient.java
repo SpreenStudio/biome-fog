@@ -1,12 +1,12 @@
 package io.github.steveplays28.biomefog.client;
 
+import com.google.common.collect.Lists;
 import io.github.steveplays28.biomefog.command.ClientCommandRegistration;
 import io.github.steveplays28.biomefog.config.BiomeFogConfigLoader;
+import io.github.steveplays28.biomefog.objects.ColorAndBlurShader;
+import io.github.steveplays28.biomefog.objects.Shader;
 import io.github.steveplays28.biomefog.util.WorldUtil;
 import ladysnake.satin.api.event.ShaderEffectRenderCallback;
-import ladysnake.satin.api.managed.ManagedShaderEffect;
-import ladysnake.satin.api.managed.ShaderEffectManager;
-import ladysnake.satin.api.managed.uniform.Uniform4f;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
@@ -18,13 +18,15 @@ import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.glfw.GLFW;
 
-import java.awt.*;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Environment(EnvType.CLIENT)
 public class BiomeFogClient implements ClientModInitializer {
@@ -46,6 +48,7 @@ public class BiomeFogClient implements ClientModInitializer {
 	));
 
 	private boolean shader_enabled = false;
+	private final ColorAndBlurShader shader = new ColorAndBlurShader().setWithColor(true).setWithBlur(true).setColor("#fffccc");
 
 	@Override
 	public void onInitializeClient() {
@@ -72,11 +75,15 @@ public class BiomeFogClient implements ClientModInitializer {
 		shader();
 	}
 
-	private final ManagedShaderEffect shader = ShaderEffectManager.getInstance().manage(new Identifier(MOD_ID, "shaders/post/blit.json"));
-	private final Uniform4f color = shader.findUniform4f("ColorModulate");
+	public Map<String, Shader> shaders = new HashMap<>();
+	public String selected_shader = null;
 
 	private void shader(){
-		color.set(1f, 1f, 0.4f, 1.0f);
+		shaders.put("desert_blur", new ColorAndBlurShader().setWithColor(true).setWithBlur(true).setColor("#fffccc"));
+		shaders.put("desert", new ColorAndBlurShader().setWithColor(true).setWithBlur(false).setColor("#fffccc"));
+		shaders.put("green_blur", new ColorAndBlurShader().setWithColor(true).setWithBlur(true).setColor("#d8f3dc"));
+		shaders.put("green", new ColorAndBlurShader().setWithColor(true).setWithBlur(false).setColor("#d8f3dc"));
+
 		ClientTickEvents.END_CLIENT_TICK.register(client -> {
 			while (shader_key.wasPressed()) {
 				shader_enabled = !shader_enabled;
@@ -85,35 +92,18 @@ public class BiomeFogClient implements ClientModInitializer {
 
 		ShaderEffectRenderCallback.EVENT.register(tickDelta -> {
 			if (shader_enabled) {
-
-				shader.render(tickDelta);
+				Shader selected = getSelectedShader();
+				if(selected != null)
+					selected.getShader().render(tickDelta);
 			}
 		});
 	}
 
-	public void setShaderColor(String color){
-		float[] colors = parseColor(color);
-		float red = colors[0];
-		float green = colors[1];
-		float blue = colors[2];
-		this.color.set(red, green, blue, 1.0f);
-	}
-
-	public float[] parseColor(String color){
-		Color c = Color.decode(color);
-
-		int preRed = c.getRed();
-		int preGreen = c.getGreen();
-		int preBlue = c.getBlue();
-
-		float red = preRed / 255.0f;
-		float green = preGreen / 255.0f;
-		float blue = preBlue / 255.0f;
-
-		return new float[]{red, green, blue};
-	}
-
 	public static BiomeFogClient getInstance(){
 		return mod;
+	}
+
+	public Shader getSelectedShader(){
+		return selected_shader == null ? null : shaders.get(selected_shader);
 	}
 }
